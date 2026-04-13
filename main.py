@@ -40,25 +40,18 @@ class MepinPlugin(Star):
             logger.error(f"[mepin] 保存配置失败: {str(e)}")
 
     @filter.event_message_type(filter.EventMessageType.GROUP_MESSAGE)
-    async def on_group_message(self, event: AstrMessageEvent):
+    async def on_group_message(self, event: AstrMessageEvent): 
         """监听群消息，当监控用户发言时，按概率回复“没品”"""
         # 如果功能未开启，直接忽略
-        if not self.enabled:
+        if not self.enabled:  
             return
-            
         sender_id = event.get_sender_id()
-        
         # 如果发送者不在监控列表中，忽略
         if sender_id not in self.monitored_users:
             return
-            
-        # 生成随机数，判断是否触发回复
-        if random.randint(0, 100) <= self.probability:
-            try:
-                await event.send(event.plain_result("没品"))
-                logger.info(f"[mepin] 已为用户 {sender_id} 触发“没品”回复")
-            except Exception as e:
-                logger.error(f"[mepin] 发送回复失败: {str(e)}")
+        res = event.plain_result("没品")
+        yield res
+
 
     @filter.command("mepin toggle")
     @filter.permission_type(filter.PermissionType.ADMIN)
@@ -128,6 +121,13 @@ class MepinPlugin(Star):
         else:
             yield event.plain_result(f"❓ 用户 {user_id} 不在监控列表中。")
 
+    @filter.command("mepin_test")
+    async def mepin_test(self, event: AstrMessageEvent):
+        """手动触发：直接回复“没品”"""
+        yield event.plain_result("没品")
+        logger.info(f"[mepin] 用户 {event.get_sender_id()} 执行了手动测试命令")
+
+         
     async def terminate(self):
         """插件卸载时的清理工作"""
         logger.info("[mepin] 插件正在关闭...")
