@@ -1,5 +1,5 @@
 name: astrbot_plugin_mepin
-author: Anonymous
+author: xuebao
 description: 当指定用户在群聊中发送消息时，有一定概率自动回复“没品”，功能可由管理员关闭。
-version: 1.0.0
-repo: https://github.com/AstrBotDevs/astrbot_plugin_mepin
+version: 1.0.1
+repo: https://github.com/HEROyyx123/astrbot_plugin_mepin
