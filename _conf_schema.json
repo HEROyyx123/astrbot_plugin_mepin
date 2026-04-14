@@ -10,7 +10,7 @@
     "description": "触发“没品”回复的概率（0-100）",
     "type": "int",
     "hint": "设置0到100之间的整数，表示触发回复的百分比概率。例如：10表示10%概率回复。",
-    "default": 10,
+    "default": 100,
     "options": [
       0,
       5,
@@ -37,9 +37,6 @@
     "description": "被监控的用户ID列表",
     "type": "list",
     "hint": "输入平台唯一用户ID（如QQ号、Telegram ID等），插件将仅对列表中的用户触发回复。支持多用户，每行一个ID。",
-    "default": [],
-    "editor_mode": true,
-    "editor_language": "text",
-    "editor_theme": "vs-light"
+    "default": []
   }
 }
