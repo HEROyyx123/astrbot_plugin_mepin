@@ -1,11 +1,12 @@
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
 from astrbot.api.star import Context, Star
 from astrbot.api import logger
+from astrbot.api import AstrBotConfig
 import random
 from typing import List
 
 class MepinPlugin(Star):
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
         # 初始化默认配置
         self.default_enabled = False
@@ -13,28 +14,26 @@ class MepinPlugin(Star):
         self.default_monitored_users: List[str] = []
         
         # 从插件存储加载配置，若无则使用默认值
-        self.enabled = self.get_kv_data("enabled", self.default_enabled)
-        self.probability = self.get_kv_data("probability", self.default_probability)
-        self.monitored_users = self.get_kv_data("monitored_users", self.default_monitored_users)
+        self.enabled = config.get("enabled", self.default_enabled)
+        self.probability = config.get("probability", self.default_probability)
+        self.monitored_users = config.get("monitored_users", self.default_monitored_users)
         
         # 确保概率在合理范围内
         if not isinstance(self.probability, int) or self.probability < 0 or self.probability > 100:
             self.probability = self.default_probability
-            self.save_config()
+            self.config.save_config() # 保存配置
         
         # 确保 monitored_users 是列表类型
         if not isinstance(self.monitored_users, list):
             self.monitored_users = self.default_monitored_users
-            self.save_config()
+            self.config.save_config() # 保存配置
             
         logger.info(f"[mepin] 插件初始化完成：enabled={self.enabled}, probability={self.probability}, monitored_users={self.monitored_users}")
 
     async def save_config(self):
         """保存当前配置到插件存储"""
         try:
-            self.put_kv_data("enabled", self.enabled)
-            self.put_kv_data("probability", self.probability)
-            self.put_kv_data("monitored_users", self.monitored_users)
+            self.context.save_config() # 保存配置
             logger.info("[mepin] 配置已保存至存储")
         except Exception as e:
             logger.error(f"[mepin] 保存配置失败: {str(e)}")
@@ -49,9 +48,11 @@ class MepinPlugin(Star):
         # 如果发送者不在监控列表中，忽略
         if sender_id not in self.monitored_users:
             return
-        res = event.plain_result("没品")
-        yield res
-
+        # 生成随机数，判断是否触发回复
+        if random.randint(0, 100) <= self.probability:
+            res = event.plain_result("没品")
+            yield res
+            return    
 
     @filter.command("mepin toggle")
     @filter.permission_type(filter.PermissionType.ADMIN)
